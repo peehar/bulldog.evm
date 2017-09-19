@@ -7,7 +7,7 @@ using namespace data;
 
 int main(int argc, char *argv[])
 {
-    Data data(10.0);
+    Data data = Data::newNumber(10.0);
     Object obj;
     string pname("aa");
     obj.Put(pname, data, true);

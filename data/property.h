@@ -19,35 +19,50 @@
 #define DATA_PROPERTY_H
 
 #include "data.h"
+#include <memory>
 
 namespace data {
+    
+class Object;
 
 class Property
 {
 public:
+    Property(Object* desc);
+    
+
+    void defineOwnProperty(Object* desc);
+
+    Data get();
+    void set(const Data& data);
+    
+private:
+    
+    class PropertyMethod {
+    public:
+        virtual Data get() = 0;
+        virtual void set(const Data& data) = 0;
+    };
+    class DataProperty : public PropertyMethod
+    {
+    public:
+        Data Value;
+        bool Configurable;
+        virtual Data get();
+        virtual void set(const Data& data);
+    };
+    class AccessorProperty : public PropertyMethod
+    {
+    public:
+        Data Get;
+        Data Set;
+        virtual Data get();
+        virtual void set(const Data& data);
+    };
+    
     bool Enumerable;
     bool Configurable;
-    virtual Data get() = 0;
-    virtual void set(const Data& data) = 0;
-};
-
-class DataProperty : public Property 
-{
-public:
-    Data Value;
-    bool Configurable;
-    virtual Data get();
-    virtual void set(const Data& data);
-};
-
-
-class AccessorProperty : public Property 
-{
-public:
-    Data Get;
-    Data Set;
-    virtual Data get();
-    virtual void set(const Data& data);
+    std::shared_ptr<PropertyMethod> method;    
 };
 
 }

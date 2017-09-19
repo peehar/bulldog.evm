@@ -29,15 +29,21 @@ class Object;
 class Data
 {
 public:
-    enum Type { NUMBER, BOOLEAN, STRING, OBJECT };
+    enum Type { UNDEFINED, NUL, NUMBER, BOOLEAN, STRING, OBJECT };
     
-    Data(double num);
-    Data(bool boolean);
-    Data(char* string);
-    Data(Object* obj);  
+    static Data newUndefined();
+    static Data newNull();
+    static Data newNumber(double num);
+    static Data newBoolean(bool boolean);
+    static Data newString(char* string);
+    static Data newObject(Object* obj);  
+    
+public:
+    Data();
     Data(const Data& data);
     ~Data();
     
+public:
     double number() throw(DataException);
     bool boolean() throw(DataException);
     const char* string() throw(DataException);
@@ -46,6 +52,7 @@ public:
     Type type() { return mtype; }
     
     void operator=(const Data& data); 
+    bool operator==(Type type);
     
 private:
     union _data 

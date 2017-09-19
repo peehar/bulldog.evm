@@ -19,23 +19,44 @@
 
 using namespace data;
 
-Data DataProperty::get()
-{
-    return Value;
-}
-
-void DataProperty::set(const Data& data)
-{
-    Value = data;
-}
-
-
-Data AccessorProperty::get()
+Property::Property(Object* desc)
 {
     
 }
 
-void AccessorProperty::set(const Data& data)
+void Property::defineOwnProperty(Object* desc)
+{
+
+}
+
+Data Property::get()
+{
+    return method->get();
+}
+
+void Property::set(const Data& data)
+{
+    method->set(data);
+}
+
+Data Property::DataProperty::get()
+{
+    return Value;
+}
+
+void Property::DataProperty::set(const Data& data)
+{
+
+}
+
+Data Property::AccessorProperty::get()
+{
+    if (Get == Data::UNDEFINED) {
+        return Data::newUndefined();
+    }
+}
+
+void Property::AccessorProperty::set(const Data& data)
 {
 
 }

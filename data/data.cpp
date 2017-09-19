@@ -22,30 +22,57 @@
 
 using namespace data;
 
-Data::Data(double num)
+Data Data::newUndefined()
 {
-    data.number = num;
-    mtype = NUMBER;
+    Data data;
+    data.mtype = UNDEFINED;
+    return data;
 }
 
-Data::Data(bool boolean)
+Data Data::newNull()
 {
-    data.boolean = boolean;
-    mtype = BOOLEAN;
+    Data data;
+    data.mtype = NUL;
+    return data;
 }
 
-Data::Data(char* string)
+Data Data::newNumber(double num)
 {
-    data.string.c_str = string;
-    data.string.counter = new int;
-    *(data.string.counter) = 1;
-    mtype = STRING;
+    Data data;
+    data.data.number = num;
+    data.mtype = NUMBER;
+    return data;
 }
 
-Data::Data(Object* obj)
+Data Data::newBoolean(bool boolean)
 {
-    data.object = obj;
-    mtype = OBJECT;
+    Data data;
+    data.data.boolean = boolean;
+    data.mtype = BOOLEAN;
+    return data;
+}
+
+Data Data::newString(char* string)
+{
+    Data data;
+    data.data.string.c_str = string;
+    data.data.string.counter = new int;
+    *(data.data.string.counter) = 1;
+    data.mtype = STRING;
+    return data;
+}
+
+Data Data::newObject(Object* obj)
+{
+    Data data;
+    data.data.object = obj;
+    data.mtype = OBJECT;
+    return data;
+}
+
+Data::Data()
+{
+    mtype = UNDEFINED;
 }
 
 Data::Data(const Data& data)
@@ -75,6 +102,12 @@ void Data::operator=(const Data& data)
     if (mtype == STRING) 
         this->data.string.counter++;
 }
+
+bool Data::operator==(Data::Type type)
+{
+    return mtype == type;
+}
+
 
 double Data::number() throw(DataException)
 {
