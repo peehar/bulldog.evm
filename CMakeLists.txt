@@ -1,0 +1,10 @@
+cmake_minimum_required(VERSION 2.8)
+project(bulldog.evm)
+add_compile_options(-std=c++11)
+add_subdirectory(data)
+add_subdirectory(exec)
+aux_source_directory(. SRC_LIST)
+add_executable(evm main.cpp )
+target_link_libraries(evm data exec)
+
+install(TARGETS evm RUNTIME DESTINATION bin)
