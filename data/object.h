@@ -30,12 +30,20 @@ class Property;
 class Object
 {
 public:
-    Object(Object* parent = nullptr) : prototype(parent) {}
-    Data Get(const std::string& pname);
-    void Put(const std::string& pname, Data& data, bool s);
+    Object(Object* parent = nullptr) : prototype(parent), extensible(true) {}
+    Data get(const std::string& pname);
+    void put(const std::string& pname, Data& data, bool t);
+    
 private:
-    Object* prototype;
+    std::shared_ptr<Property> getOwnProperty(const std::string& pname);
+    std::shared_ptr<Property> getProperty(const std::string& pname);
+    bool addDataProperty(const std::string& pname, bool t, Data& value, bool writable, bool enumerable, bool configurable);
+//     void addAccessorProperty();
+    
+private:
     std::map<std::string, std::shared_ptr<Property>> properties;
+    Object* prototype;
+    bool extensible;
 };
 
 } // namespace data

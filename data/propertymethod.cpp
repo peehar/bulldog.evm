@@ -15,34 +15,48 @@
  *
  */
 
-#include "property.h"
 #include "propertymethod.h"
+#include "function.h"
+#include "../typeerror.h"
 
 using namespace data;
 
-Property::Property(Data& value, bool writable, bool enumerable, bool configurable)
+
+Data DataProperty::get(Object* obj)
 {
-    enumerable = enumerable;
-    configurable = configurable;
-    auto dp = new DataProperty();
-    dp->Value = value;
-    dp->Writable = writable;
-    method = std::shared_ptr<PropertyMethod>(dp);
-    mtype = DATA_PROPERTY;
+    return Value;
 }
 
-Data Property::get(Object* obj)
+void DataProperty::put(const Data& data, bool t, Object* obj)
 {
-    return method->get(obj);
+    if (!this->Writable)
+    {
+        if (t)
+            throw TypeError();
+    }
+    else
+    {
+        Value = data;
+    }
 }
 
-void Property::put(const Data& data, Object* obj)
+Data AccessorProperty::get(Object* obj)
 {
-    method->put(data, obj);
+    if (getter == nullptr)
+        return Data::newUndefined();
+    return getter->call(obj);
 }
 
-Property::Type Property::type()
+void AccessorProperty::put(const Data& data, bool t, Object* obj)
 {
-    return mtype;
+    if (setter == nullptr)
+    {
+        if (t)
+            throw TypeError();
+    }
+    else
+    {
+        std::list<Data> param = { data };
+        setter->call(obj, param);
+    }
 }
-

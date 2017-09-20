@@ -15,36 +15,4 @@
  *
  */
 
-#ifndef DATA_PROPERTY_H
-#define DATA_PROPERTY_H
-
-#include "data.h"
-#include "propertymethod.h"
-
-#include <memory>
-
-namespace data {
-    
-class Object;
-
-class Property
-{
-public:
-    enum Type { DATA_PROPERTY, ACCESSOR_PROPERTY };
-
-    Property(Data& value, bool writable, bool enumerable, bool configurable);
-    Data get(Object* obj = nullptr);
-    void put(const Data& data, Object* obj = nullptr);
-    Type type();
-    
-private:
-    bool enumerable;
-    bool configurable;
-    Type mtype;
-    std::shared_ptr<PropertyMethod> method;
-};
-
-
-}
-
-#endif // DATA_PROPERTY_H
+#include "typeerror.h"
