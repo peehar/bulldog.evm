@@ -53,6 +53,7 @@ public:
     
     void operator=(const Data& data); 
     bool operator==(Type type);
+    bool operator==(const Data& type);
     
 private:
     union _data 

@@ -37,20 +37,25 @@ void Object::put(const string& pname, Data& data, bool t)
     auto prop = getOwnProperty(pname);
     if (prop && prop->type() == Property::DATA_PROPERTY) 
     {
-        prop->put(data);
+        prop->putValue(data);
     }
     else 
     {
         prop = getProperty(pname);
         if (!prop) 
         {
-            addDataProperty(pname, t, data, true, true, true);
+            properties[pname] = PropertyPtr(new DataProperty(data, true, true, true));
         }
         else 
         {
-            prop->put(data, this);
+            prop->putValue(data, this);
         }
     }
+}
+
+bool Object::hasProperty(const string& pname)
+{
+    return properties.find(pname) != properties.end();
 }
 
 std::shared_ptr<Property> Object::getOwnProperty(const std::string& pname) 
@@ -68,7 +73,65 @@ std::shared_ptr<Property> Object::getProperty(const std::string& pname)
     return prop;
 }
 
+bool Object::defineDataProperty(const string& pname, Obejct* desc, bool t)
+{
+    if (properties.find(pname) == properties.end())
+    {
+        if (!extensible) {
+            if (t)
+                throw TypeError();
+        }
+        else 
+        {
+            PropertyPtr pp(desc);
+            properties[pname] = pp;
+        }
+    }
+    else 
+    {
+        if (!desc->properties.empty()) 
+            properties[pname].defineDataProperty(desc);
+    }
+    return true;
+}
+
+
+/*
 bool Object::addDataProperty(const std::string& pname, bool t, Data& value, bool writable, bool enumerable, bool configurable)
+{
+    return defineDataProperty(pname, t, &value, &writable, &enumerable, &configurable);
+}
+
+bool Object::defineDataProperty(const std::string& pname, bool t, Data* value, bool* writable, bool* enumerable, bool* configurable)
+{
+    if (properties.find(pname) == properties.end()) 
+    {
+        if (!extensible) 
+        {
+            if (t)
+                throw TypeError();
+            return false;
+        }
+        properties[pname] = shared_ptr<Property>(new DataProperty(*value, *writable, *enumerable, *configurable));
+    }
+    else
+    {
+        auto prop = properties[pname];
+        if (!prop->configurable()) 
+        {
+            
+        }
+    }
+    
+    return true;
+}
+
+bool Object::addAccessorProperty(const std::string& pname, bool t, Function* getter, Function* setter, bool enumerable, bool configurable)
+{
+    return defineAccessorProperty(pname, t, getter, setter, &enumerable, &configurable);
+}
+
+bool Object::defineAccessorProperty(const std::string& pname, bool t, Function* getter, Function* setter, bool* enumerable, bool* configurable)
 {
     if (!extensible) 
     {
@@ -76,8 +139,8 @@ bool Object::addDataProperty(const std::string& pname, bool t, Data& value, bool
             throw TypeError();
         return false;
     }
-    properties[pname] = shared_ptr<Property>(new Property (value, writable, enumerable, configurable));
+    properties[pname] = shared_ptr<Property>(new AccessorProperty(getter, setter, enumerable, configurable));
     return true;
-}
+}*/
 
 }// namespace data

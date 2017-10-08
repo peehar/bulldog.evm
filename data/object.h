@@ -26,6 +26,8 @@
 namespace data {
 
 class Property;
+class PropertyPtr;
+class Function;
     
 class Object
 {
@@ -34,14 +36,22 @@ public:
     Data get(const std::string& pname);
     void put(const std::string& pname, Data& data, bool t);
     
+    bool hasProperty(const std::string& pname);
+    
 private:
     std::shared_ptr<Property> getOwnProperty(const std::string& pname);
     std::shared_ptr<Property> getProperty(const std::string& pname);
-    bool addDataProperty(const std::string& pname, bool t, Data& value, bool writable, bool enumerable, bool configurable);
-//     void addAccessorProperty();
     
+    bool defineDataProperty(const std::string& pname, Obejct* desc, bool t);
+    
+    /*
+    bool addDataProperty(const std::string& pname, bool t, Data& value, bool writable, bool enumerable, bool configurable);
+    bool defineDataProperty(const std::string& pname, bool t, Data* value, bool* writable, bool* enumerable, bool* configurable);
+    bool addAccessorProperty(const std::string& pname, bool t, Function* getter, Function* setter, bool enumerable, bool configurable);
+    bool defineAccessorProperty(const std::string& pname, bool t, Function* getter, Function* setter, bool* enumerable, bool* configurable);
+    */
 private:
-    std::map<std::string, std::shared_ptr<Property>> properties;
+    std::map<std::string, PropertyPtr> properties;
     Object* prototype;
     bool extensible;
 };
