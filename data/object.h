@@ -20,29 +20,28 @@
 
 #include <map>
 #include <string>
-#include <memory>
 #include "data.h"
+#include "propertyptr.h"
 
 namespace data {
 
-class Property;
-class PropertyPtr;
 class Function;
     
 class Object
 {
 public:
     Object(Object* parent = nullptr) : prototype(parent), extensible(true) {}
-    Data get(const std::string& pname);
-    void put(const std::string& pname, Data& data, bool t);
+    virtual ~Object() {}
+    Data getValue(const std::string& pname);
+    void putValue(const std::string& pname, const Data& data, bool t);
     
     bool hasProperty(const std::string& pname);
     
 private:
-    std::shared_ptr<Property> getOwnProperty(const std::string& pname);
-    std::shared_ptr<Property> getProperty(const std::string& pname);
+    PropertyPtr getOwnProperty(const std::string& pname);
+    PropertyPtr getProperty(const std::string& pname);
     
-    bool defineDataProperty(const std::string& pname, Obejct* desc, bool t);
+    bool defineDataProperty(const std::string& pname, Object* desc, bool t);
     
     /*
     bool addDataProperty(const std::string& pname, bool t, Data& value, bool writable, bool enumerable, bool configurable);

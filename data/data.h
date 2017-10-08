@@ -18,7 +18,6 @@
 #ifndef DATA_DATA_H
 #define DATA_DATA_H
 
-#include <memory>
 #include <string>
 #include "dataexception.h"
 
@@ -54,6 +53,9 @@ public:
     void operator=(const Data& data); 
     bool operator==(Type type);
     bool operator==(const Data& type);
+    
+public:
+    bool toBoolean();
     
 private:
     union _data 

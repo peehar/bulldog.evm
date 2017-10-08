@@ -136,4 +136,10 @@ Object* Data::object() throw(DataException)
         throw DataException();
     return data.object;
 }
+
+bool Data::toBoolean()
+{
+    return false;
+}
+
    

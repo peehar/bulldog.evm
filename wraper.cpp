@@ -15,15 +15,4 @@
  * 
  */
 
-#ifndef DATA_CAST_H
-#define DATA_CAST_H
-
-namespace data {
-    
-    class Data;
-
-    bool ToBoolean(const Data& data);
-    
-}
-
-#endif // DATA_CAST_H
+#include "wraper.h"

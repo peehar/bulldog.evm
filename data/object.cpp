@@ -24,15 +24,15 @@ namespace data {
     
 using namespace std;
 
-Data Object::get(const string& pname)
+Data Object::getValue(const string& pname)
 {
     auto prop = getProperty(pname);
     if (!prop)
         return Data::newUndefined();
-    return prop->get();
+    return prop->getValue();
 }
 
-void Object::put(const string& pname, Data& data, bool t)
+void Object::putValue(const string& pname, const Data& data, bool t)
 {
     auto prop = getOwnProperty(pname);
     if (prop && prop->type() == Property::DATA_PROPERTY) 
@@ -58,14 +58,14 @@ bool Object::hasProperty(const string& pname)
     return properties.find(pname) != properties.end();
 }
 
-std::shared_ptr<Property> Object::getOwnProperty(const std::string& pname) 
+PropertyPtr Object::getOwnProperty(const std::string& pname) 
 {
     if (properties.find(pname) == properties.end())
-        return shared_ptr<Property>();
+        return PropertyPtr();
     return properties[pname];
 }
 
-std::shared_ptr<Property> Object::getProperty(const std::string& pname) 
+PropertyPtr Object::getProperty(const std::string& pname) 
 {
     auto prop = getOwnProperty(pname);
     if (prototype != nullptr)
@@ -73,7 +73,7 @@ std::shared_ptr<Property> Object::getProperty(const std::string& pname)
     return prop;
 }
 
-bool Object::defineDataProperty(const string& pname, Obejct* desc, bool t)
+bool Object::defineDataProperty(const string& pname, Object* desc, bool t)
 {
     if (properties.find(pname) == properties.end())
     {

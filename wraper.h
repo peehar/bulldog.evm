@@ -15,6 +15,20 @@
  * 
  */
 
-#include "cast.h"
+#ifndef WRAPER_H
+#define WRAPER_H
 
-using namespace data;
+template<typename T>
+class Wraper
+{
+public:
+    Wraper() : mNull(true) {}
+    Wraper(T val) : mNull(false), mValue(val) {}
+    operator T() { return mValue; }
+    bool isNull() { return mNull; }
+private:
+    bool mNull;
+    T mValue;
+};
+
+#endif // WRAPER_H

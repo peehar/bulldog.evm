@@ -18,13 +18,31 @@
 #ifndef DATA_PROPERTY_H
 #define DATA_PROPERTY_H
 
+#include "../wraper.h"
 #include "data.h"
-#include <memory>
 
 namespace data {
     
 class Object;
 class Function;
+
+struct PropertyDesc
+{
+    Wraper<bool> configurable;
+    Wraper<bool> enumrable;
+};
+
+struct DataPropertyDesc : public PropertyDesc
+{
+    Wraper<Data> value;
+    Wraper<bool> writable;
+};
+
+struct AccessorPropertyDesc : public PropertyDesc
+{
+    Wraper<Function*> getter;
+    Wraper<Function*> setter;
+};
 
 class Property
 {
@@ -32,7 +50,6 @@ public:
     enum Type { DATA_PROPERTY, ACCESSOR_PROPERTY };
     virtual Data getValue(Object* obj = nullptr) = 0;
     virtual void putValue(const Data& data, bool t = false, Object* obj = nullptr) = 0;    
-    virtual void defineDataProperty(Obejct* desc) = 0;
     virtual Type type() = 0;
     
 private:
@@ -49,8 +66,8 @@ public:
     
     virtual Data getValue(Object* obj = nullptr);
     virtual void putValue(const Data& data, bool t = false, Object* obj = nullptr);
-    virtual void defineDataProperty(Obejct* desc);
     virtual Type type()     { return DATA_PROPERTY; }
+    void define(DataPropertyDesc& desc);
     
 private:
     Data mValue;
@@ -68,8 +85,8 @@ public:
     
     virtual Data getValue(Object* obj = nullptr);
     virtual void putValue(const Data& data, bool t = false, Object* obj = nullptr);
-    virtual void defineDataProperty(Obejct* desc);
     virtual Type type()     { return ACCESSOR_PROPERTY; }
+    virtual void define(AccessorPropertyDesc& desc);
     
 private:
     Function* mGetter;
@@ -79,18 +96,6 @@ private:
 };
 
 
-class PropertyPtr : public std::shared_ptr<Property>
-{
-public:
-    PropertyPtr() {}
-    PropertyPtr(Property* ptr) : shared_ptr< data::Property >(ptr) {}
-    PropertyPtr(Obejct* desc);    
-    virtual void defineDataProperty(Obejct* desc);
-    
-private:
-    bool isDataDesc(Object* desc);
-    bool isAccessorDesc(Object* desc);
-};
 
 }
 
