@@ -23,12 +23,29 @@
 using namespace data;
 using namespace std;
 
+DataProperty::DataProperty(PropertyDescPtr desc)
+{
+    mValue = Data::newUndefined();
+    mWritable = false;
+    mEnum = desc->enumrable.get(false);
+    mConfig = desc->configurable.get(false);
+}
+
+DataProperty::DataProperty(DataPropertyDescPtr desc)
+{
+    mValue = desc->value.get(Data::newUndefined());
+    mWritable = desc->writable.get(false);
+    mEnum = desc->enumrable.get(false);
+    mConfig = desc->configurable.get(false);
+}
+
+
 Data DataProperty::getValue(Object* obj)
 {
     return mValue;
 }
 
-void DataProperty::putValue(const Data& data, bool t, Object* obj)
+void DataProperty::putValue(const Data& data, Object* obj, bool t)
 {
     if (!this->mWritable)
     {
@@ -41,7 +58,7 @@ void DataProperty::putValue(const Data& data, bool t, Object* obj)
     }
 }
 
-void DataProperty::define(DataPropertyDesc& desc)
+void DataProperty::define(DataPropertyDesc& desc, bool t)
 {
     if (!mConfig) 
     {
@@ -68,6 +85,14 @@ void DataProperty::define(DataPropertyDesc& desc)
     
 }
 
+data::AccessorProperty::AccessorProperty(AccessorPropertyDescPtr desc)
+{
+    mGetter = desc->getter;
+    mSetter = desc->setter;
+    mEnum = desc->enumrable.get(false);
+    mConfig = desc->configurable.get(false);
+}
+
 Data AccessorProperty::getValue(Object* obj)
 {
     if (mGetter == nullptr)
@@ -75,7 +100,7 @@ Data AccessorProperty::getValue(Object* obj)
     return mGetter->call(obj);
 }
 
-void AccessorProperty::putValue(const Data& data, bool t, Object* obj)
+void AccessorProperty::putValue(const Data& data, Object* obj, bool t)
 {
     if (mSetter == nullptr)
     {
@@ -89,7 +114,7 @@ void AccessorProperty::putValue(const Data& data, bool t, Object* obj)
     }
 }
 
-void AccessorProperty::define(AccessorPropertyDesc& desc)
+void AccessorProperty::define(AccessorPropertyDesc& desc, bool t)
 {
     if (!mConfig) 
     {
@@ -98,19 +123,13 @@ void AccessorProperty::define(AccessorPropertyDesc& desc)
             mConfig = desc.configurable;
         }
         
-        if (!desc.enumrable.isNull()) 
+        if (!desc.enumrable.isNull())
         {
             mEnum = desc.enumrable;
         }
                 
-        if (!desc.getter.isNull())
-        {
-            mGetter = desc.getter;
-        }
+        mGetter = desc.getter;
         
-        if (!desc.setter.isNull())
-        {
-            mSetter = desc.setter;
-        }
+        mSetter = desc.setter;
     }
 }

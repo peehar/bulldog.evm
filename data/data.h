@@ -50,9 +50,10 @@ public:
     
     Type type() { return mtype; }
     
-    void operator=(const Data& data); 
-    bool operator==(Type type);
-    bool operator==(const Data& type);
+    void operator =(const Data& data); 
+    bool operator ==(Type type);
+    bool operator ==(const Data& type);
+    bool operator !=(Type type);
     
 public:
     bool toBoolean();

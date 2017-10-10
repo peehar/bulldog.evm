@@ -26,6 +26,16 @@ public:
     Wraper(T val) : mNull(false), mValue(val) {}
     operator T() { return mValue; }
     bool isNull() { return mNull; }
+    T operator =(const T val) 
+    { 
+        mValue = val; 
+        return mValue;
+    }
+    
+    T get(T defval)
+    {
+        return mNull ? defval : mValue;
+    }
 private:
     bool mNull;
     T mValue;

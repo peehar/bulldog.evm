@@ -20,8 +20,11 @@
 
 #include "../wraper.h"
 #include "data.h"
+#include <memory>
 
 namespace data {
+
+enum Type { GENERIC_PROPERTY, DATA_PROPERTY, ACCESSOR_PROPERTY };    
     
 class Object;
 class Function;
@@ -30,44 +33,50 @@ struct PropertyDesc
 {
     Wraper<bool> configurable;
     Wraper<bool> enumrable;
+    virtual Type getType() { return GENERIC_PROPERTY; }
+    virtual ~PropertyDesc() {}
 };
 
 struct DataPropertyDesc : public PropertyDesc
 {
     Wraper<Data> value;
     Wraper<bool> writable;
+    virtual Type getType() { return DATA_PROPERTY; }
 };
 
 struct AccessorPropertyDesc : public PropertyDesc
 {
-    Wraper<Function*> getter;
-    Wraper<Function*> setter;
+    Function* getter = nullptr;
+    Function* setter = nullptr;
+    virtual Type getType() { return ACCESSOR_PROPERTY; }
 };
+
+typedef std::shared_ptr<PropertyDesc> PropertyDescPtr;
+typedef std::shared_ptr<DataPropertyDesc> DataPropertyDescPtr;
+typedef std::shared_ptr<AccessorPropertyDesc> AccessorPropertyDescPtr;
 
 class Property
 {
 public:
-    enum Type { DATA_PROPERTY, ACCESSOR_PROPERTY };
+
+    virtual ~Property() {}
     virtual Data getValue(Object* obj = nullptr) = 0;
-    virtual void putValue(const Data& data, bool t = false, Object* obj = nullptr) = 0;    
+    virtual void putValue(const Data& data, Object* obj = nullptr, bool t = false) = 0;    
     virtual Type type() = 0;
-    
-private:
-    bool mEnum;
-    bool mConfig;
 };
 
 class DataProperty : public Property
 {
 public:
+    DataProperty(PropertyDescPtr desc);
+    DataProperty(DataPropertyDescPtr desc);
     DataProperty(Data value, bool writable, bool enumerable, bool configurable)
     : mValue(value), mWritable(writable), mEnum(enumerable), mConfig(configurable)
     {}
-    
     virtual Data getValue(Object* obj = nullptr);
-    virtual void putValue(const Data& data, bool t = false, Object* obj = nullptr);
+    virtual void putValue(const Data& data, Object* obj = nullptr, bool t = false);
     virtual Type type()     { return DATA_PROPERTY; }
-    void define(DataPropertyDesc& desc);
+    void define(DataPropertyDescPtr& desc, bool t = false);
     
 private:
     Data mValue;
@@ -79,14 +88,14 @@ private:
 class AccessorProperty : public Property
 {
 public:
+    AccessorProperty(AccessorPropertyDescPtr desc);
     AccessorProperty(Function* getter, Function* setter, bool enumerable, bool configurable)
     : mGetter(getter), mSetter(setter), mEnum(enumerable), mConfig(configurable)
-    {}
-    
+    {}    
     virtual Data getValue(Object* obj = nullptr);
-    virtual void putValue(const Data& data, bool t = false, Object* obj = nullptr);
+    virtual void putValue(const Data& data, Object* obj = nullptr, bool t = false);
     virtual Type type()     { return ACCESSOR_PROPERTY; }
-    virtual void define(AccessorPropertyDesc& desc);
+    virtual void define(AccessorPropertyDescPtr& desc, bool t = false);
     
 private:
     Function* mGetter;
@@ -95,6 +104,7 @@ private:
     bool mConfig;
 };
 
+typedef std::shared_ptr<Property> PropertyPtr;
 
 
 }

@@ -107,6 +107,11 @@ bool Data::operator==(Data::Type type)
 {
     return mtype == type;
 }
+bool data::Data::operator!=(data::Data::Type type)
+{
+    return mtype != type;
+}
+
 
 
 double Data::number() throw(DataException)

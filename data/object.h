@@ -21,12 +21,10 @@
 #include <map>
 #include <string>
 #include "data.h"
-#include "propertyptr.h"
+#include "property.h"
 
 namespace data {
 
-class Function;
-    
 class Object
 {
 public:
@@ -49,6 +47,8 @@ private:
     bool addAccessorProperty(const std::string& pname, bool t, Function* getter, Function* setter, bool enumerable, bool configurable);
     bool defineAccessorProperty(const std::string& pname, bool t, Function* getter, Function* setter, bool* enumerable, bool* configurable);
     */
+    
+    PropertyDescPtr createPropertyDesc(Object* desc);
 private:
     std::map<std::string, PropertyPtr> properties;
     Object* prototype;
