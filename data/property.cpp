@@ -58,29 +58,30 @@ void DataProperty::putValue(const Data& data, Object* obj, bool t)
     }
 }
 
-void DataProperty::define(DataPropertyDesc& desc, bool t)
+
+void DataProperty::define(DataPropertyDescPtr& desc, bool t)
 {
     if (!mConfig) 
     {
-        if (!desc.configurable.isNull()) 
+        if (!desc->configurable.isNull()) 
         {
-            mConfig = desc.configurable;
+            mConfig = desc->configurable;
         }
         
-        if (!desc.enumrable.isNull()) 
+        if (!desc->enumrable.isNull()) 
         {
-            mEnum = desc.enumrable;
+            mEnum = desc->enumrable;
         }
         
-        if (!desc.writable.isNull())
+        if (!desc->writable.isNull())
         {
-            mWritable = desc.writable;
+            mWritable = desc->writable;
         }
     }
 
-    if (!desc.value.isNull())
+    if (!desc->value.isNull())
     {
-        mValue = desc.value;
+        mValue = desc->value;
     }
     
 }
