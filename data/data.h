@@ -21,6 +21,8 @@
 #include <string>
 #include "dataexception.h"
 
+void reject(bool t);
+
 namespace data {
 
 class Object;
@@ -72,6 +74,8 @@ private:
     _data data;
     Type mtype;
 };
+
+
 
 }
 

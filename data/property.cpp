@@ -16,7 +16,6 @@
  */
 
 #include "property.h"
-#include "../typeerror.h"
 #include "function.h"
 #include "object.h"
 
@@ -48,35 +47,35 @@ Data DataProperty::getValue(Object* obj)
 void DataProperty::putValue(const Data& data, Object* obj, bool t)
 {
     if (!this->mWritable)
-    {
-        if (t)
-            throw TypeError();
-    }
+        reject(t);
     else
-    {
         mValue = data;
-    }
 }
-
 
 void DataProperty::define(DataPropertyDescPtr& desc, bool t)
 {
-    if (!mConfig) 
+    if (!desc->configurable.isNull())
     {
-        if (!desc->configurable.isNull()) 
-        {
+        if (!mConfig && desc->configurable)
+            reject(t);
+        else
             mConfig = desc->configurable;
-        }
-        
-        if (!desc->enumrable.isNull()) 
-        {
+    }
+
+    if (!desc->enumrable.isNull())
+    {
+        if (!mConfig && mEnum != desc->enumrable)
+            reject(t);
+        else
             mEnum = desc->enumrable;
-        }
-        
-        if (!desc->writable.isNull())
-        {
+    }
+
+    if (!desc->writable.isNull())
+    {
+        if (!mConfig && mWritable != desc->writable)
+            reject(t);
+        else
             mWritable = desc->writable;
-        }
     }
 
     if (!desc->value.isNull())
@@ -105,8 +104,7 @@ void AccessorProperty::putValue(const Data& data, Object* obj, bool t)
 {
     if (mSetter == nullptr)
     {
-        if (t)
-            throw TypeError();
+        reject(t);
     }
     else
     {
@@ -115,22 +113,37 @@ void AccessorProperty::putValue(const Data& data, Object* obj, bool t)
     }
 }
 
-void AccessorProperty::define(AccessorPropertyDesc& desc, bool t)
+void AccessorProperty::define(AccessorPropertyDescPtr& desc, bool t)
 {
-    if (!mConfig) 
+    if (!desc->configurable.isNull())
     {
-        if (!desc.configurable.isNull()) 
-        {
-            mConfig = desc.configurable;
-        }
-        
-        if (!desc.enumrable.isNull())
-        {
-            mEnum = desc.enumrable;
-        }
-                
-        mGetter = desc.getter;
-        
-        mSetter = desc.setter;
+        if (!mConfig && desc->configurable)
+            reject(t);
+        else
+            mConfig = desc->configurable;
+    }
+
+    if (!desc->enumrable.isNull())
+    {
+        if (!mConfig && desc->enumrable)
+            reject(t);
+        else
+            mEnum = desc->enumrable;
+    }
+
+    if (desc->getter != nullptr)
+    {
+        if (!mConfig && mGetter != desc->getter)
+            reject(t);
+        else
+            mGetter = desc->getter;
+    }
+
+    if (desc->setter != nullptr)
+    {
+        if (!mConfig && mSetter != desc->setter)
+            reject(t);
+        else
+            mSetter = desc->setter;
     }
 }

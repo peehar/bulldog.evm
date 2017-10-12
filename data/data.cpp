@@ -17,10 +17,17 @@
 
 #include "data.h"
 #include "object.h"
+#include "../typeerror.h"
 
 #include <cstring>
 
 using namespace data;
+
+void reject(bool t)
+{
+    if (t)
+        throw TypeError();
+}
 
 Data Data::newUndefined()
 {
@@ -147,4 +154,3 @@ bool Data::toBoolean()
     return false;
 }
 
-   

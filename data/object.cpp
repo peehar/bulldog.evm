@@ -37,7 +37,7 @@ Data Object::getValue(const string& pname)
 void Object::putValue(const string& pname, const Data& data, bool t)
 {
     auto prop = getOwnProperty(pname);
-    if (prop && prop->type() == Property::DATA_PROPERTY) 
+    if (prop && prop->type() == DATA_PROPERTY) 
     {
         prop->putValue(data);
     }
@@ -81,8 +81,7 @@ bool Object::defineDataProperty(const string& pname, Object* desc, bool t)
     if (properties.find(pname) == properties.end())
     {
         if (!extensible) {
-            if (t)
-                throw TypeError();
+            reject(t);
         }
         else 
         {

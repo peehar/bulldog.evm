@@ -58,7 +58,6 @@ typedef std::shared_ptr<AccessorPropertyDesc> AccessorPropertyDescPtr;
 class Property
 {
 public:
-
     virtual ~Property() {}
     virtual Data getValue(Object* obj = nullptr) = 0;
     virtual void putValue(const Data& data, Object* obj = nullptr, bool t = false) = 0;    
