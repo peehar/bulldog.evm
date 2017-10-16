@@ -24,101 +24,78 @@
 
 namespace data {
 
-enum Type { DATA_PROPERTY, ACCESSOR_PROPERTY };    
-    
+enum Type { DATA_PROPERTY, ACCESSOR_PROPERTY };
+
 class Object;
 class Function;
-
-// struct PropertyDesc
-// {
-//     Wraper<bool> configurable;
-//     Wraper<bool> enumrable;
-//     virtual Type getType() { return GENERIC_PROPERTY; }
-//     virtual ~PropertyDesc() {}
-// };
-// 
-// struct DataPropertyDesc : public PropertyDesc
-// {
-//     Wraper<Data> value;
-//     Wraper<bool> writable;
-//     virtual Type getType() { return DATA_PROPERTY; }
-// };
-// 
-// struct AccessorPropertyDesc : public PropertyDesc
-// {
-//     Function* getter = nullptr;
-//     Function* setter = nullptr;
-//     virtual Type getType() { return ACCESSOR_PROPERTY; }
-// };
-
-// typedef std::shared_ptr<PropertyDesc> PropertyDescPtr;
-// typedef std::shared_ptr<DataPropertyDesc> DataPropertyDescPtr;
-// typedef std::shared_ptr<AccessorPropertyDesc> AccessorPropertyDescPtr;
+class Property;
+class PropertyFactor;
+typedef std::shared_ptr<Property> PropertyPtr;
+typedef std::shared_ptr<PropertyFactor> FactorPtr;
 
 class Property
 {
+    friend class DataPropertyFactor;
+    friend class AccessorPropertyFactor;
+private:
+    Property();
 public:
-
-    virtual ~Property() {}
-    virtual Data getValue(Object* obj = nullptr) = 0;
-    virtual void putValue(const Data& data, Object* obj = nullptr, bool t = false) = 0;
-    virtual Type type() = 0;
-    virtual void define(Object* desc, bool t = false);
-};
-
-class BaseProperty : public Property
-{
-public:
-    BaseProperty(bool enumerable, bool configurable);
-    void define(Object* desc, bool t = false);
-protected:
+    Property(const Data& data);
+    Data getValue(Object* obj = nullptr);
+    void putValue(const Data& data, Object* obj = nullptr);
+    void define(Object* desc);
+    Type type();
+    static PropertyPtr create(Object* desc);
+    
+private:
+    static bool isDataDesc(Object* desc);
+    static bool isAccessorDesc(Object* desc);
+    static FactorPtr createFactor(Property* prop, Object* desc);
+    
+private:
     bool mEnum;
     bool mConfig;
+    FactorPtr factor;
 };
 
-class DataProperty : public BaseProperty
+class PropertyFactor
 {
 public:
-    DataProperty(Data value, bool writable, bool enumerable, bool configurable);
+    PropertyFactor(Property* prop) : mProp(prop) {}
+    virtual ~PropertyFactor()   {}
+    virtual Data getValue(Object* obj = nullptr) = 0;
+    virtual void putValue(const Data& data, Object* obj = nullptr) = 0;
+    virtual Type type() = 0;
+    virtual void define(Object* desc) = 0;
+protected:
+    Property* mProp;
+};
+
+class DataPropertyFactor : public PropertyFactor
+{
+public:
+    DataPropertyFactor(const Data value, bool writable, Property* prop);
     virtual Data getValue(Object* obj = nullptr);
-    virtual void putValue(const Data& data, Object* obj = nullptr, bool t = false);
+    virtual void putValue(const Data& data, Object* obj = nullptr);  
     virtual Type type()     { return DATA_PROPERTY; }
-    void define(Object* desc, bool t = false);
-    
+    virtual void define(Object* desc);
 private:
     Data mValue;
     bool mWritable;
 };
 
-class AccessorProperty : public BaseProperty
+class AccessorPropertyFactor : public PropertyFactor
 {
 public:
-    AccessorProperty(Function* getter, Function* setter, bool enumerable, bool configurable);
+    AccessorPropertyFactor(Function* getter, Function* setter, Property* prop);
     virtual Data getValue(Object* obj = nullptr);
-    virtual void putValue(const Data& data, Object* obj = nullptr, bool t = false);
+    virtual void putValue(const Data& data, Object* obj = nullptr);
     virtual Type type()     { return ACCESSOR_PROPERTY; }
-    virtual void define(Object* desc, bool t = false);
-    
+    virtual void define(Object* desc);
 private:
     Function* mGetter;
     Function* mSetter;
 };
-
-
-class PropertyProxy : public Property
-{
-public:
-    PropertyProxy(Property* prop);
-    virtual Data getValue(Object* obj = nullptr);
-    virtual void putValue(const Data& data, Object* obj = nullptr, bool t = false);
-    virtual Type type();
-    virtual void define(Object* desc, bool t = false);
-    
-private:
-    Property* prop;
-};
-
-typedef std::shared_ptr<Property> PropertyPtr;
 
 }
 

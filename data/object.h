@@ -31,24 +31,15 @@ public:
     Object(Object* parent = nullptr) : prototype(parent), extensible(true) {}
     virtual ~Object() {}
     Data getValue(const std::string& pname);
-    void putValue(const std::string& pname, const Data& data, bool t);
+    void putValue(const std::string& pname, const Data& data);
     
     bool hasProperty(const std::string& pname);
     
 private:
     PropertyPtr getOwnProperty(const std::string& pname);
     PropertyPtr getProperty(const std::string& pname);
+    void defineDataProperty(const std::string& pname, Object* desc);
     
-    bool defineDataProperty(const std::string& pname, Object* desc, bool t);
-    
-    /*
-    bool addDataProperty(const std::string& pname, bool t, Data& value, bool writable, bool enumerable, bool configurable);
-    bool defineDataProperty(const std::string& pname, bool t, Data* value, bool* writable, bool* enumerable, bool* configurable);
-    bool addAccessorProperty(const std::string& pname, bool t, Function* getter, Function* setter, bool enumerable, bool configurable);
-    bool defineAccessorProperty(const std::string& pname, bool t, Function* getter, Function* setter, bool* enumerable, bool* configurable);
-    */
-    
-    PropertyDescPtr createPropertyDesc(Object* desc);
 private:
     std::map<std::string, PropertyPtr> properties;
     Object* prototype;

@@ -10,7 +10,7 @@ int main(int argc, char *argv[])
     Data data = Data::newNumber(10.0);
     Object obj;
     string pname("aa");
-    obj.putValue(pname, data, true);
+    obj.putValue(pname, data);
     cout << obj.getValue(pname).number() <<  endl;
     cout << "Hello World!" << endl;
     return 0;

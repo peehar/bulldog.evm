@@ -21,8 +21,6 @@
 #include <string>
 #include "dataexception.h"
 
-void reject(bool t);
-
 namespace data {
 
 class Object;
@@ -56,6 +54,7 @@ public:
     bool operator ==(Type type);
     bool operator ==(const Data& type);
     bool operator !=(Type type);
+    bool operator !=(const Data& type);
     
 public:
     bool toBoolean();

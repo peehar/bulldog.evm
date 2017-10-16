@@ -23,12 +23,6 @@
 
 using namespace data;
 
-void reject(bool t)
-{
-    if (t)
-        throw TypeError();
-}
-
 Data Data::newUndefined()
 {
     Data data;
@@ -117,6 +111,15 @@ bool Data::operator==(Data::Type type)
 bool data::Data::operator!=(data::Data::Type type)
 {
     return mtype != type;
+}
+
+bool Data::operator==(const Data& type)
+{
+    return false;
+}
+bool Data::operator!=(const Data& type)
+{
+    return false;
 }
 
 double Data::number() throw(DataException)

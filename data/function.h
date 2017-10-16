@@ -27,7 +27,15 @@ namespace data {
 class Function : public Object
 {
 public:
-    Data call(Object* thisptr, std::list<Data> param = std::list<Data>());
+    virtual Data call(Object* thisptr, std::list<Data> param = std::list<Data>()) = 0;
+};
+
+class NativeFucntion : public Function
+{
+};
+
+class JSFunction : public Function
+{
 };
 
 }

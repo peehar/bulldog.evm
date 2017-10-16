@@ -18,95 +18,205 @@
 #include "property.h"
 #include "function.h"
 #include "object.h"
+#include "../typeerror.h"
 
 using namespace data;
 using namespace std;
 
-
-BaseProperty::BaseProperty(bool enumerable, bool configurable)
-: mEnum(enumerable), mConfig(configurable)
+Property::Property()
 {
+    mEnum = false;
+    mConfig = false;
 }
 
-void BaseProperty::define(Object* desc, bool t)
+Property::Property(const Data& data)
+{
+    mEnum = true;
+    mConfig = true;
+    factor = shared_ptr<PropertyFactor>(new DataPropertyFactor(data, true, this));
+}
+
+Data Property::getValue(Object* obj)
+{
+    return factor->getValue(obj);
+}
+
+void Property::putValue(const Data& data, Object* obj)
+{
+    factor->putValue(data, obj);
+}
+
+void Property::define(Object* desc)
 {
     if (desc->hasProperty("enumerable"))
     {
         Data val = desc->getValue("enumerable");
         bool b = val.toBoolean();
-        if (!mConfig && mEnum != b)
-            reject(t);
-        else
-            mEnum = b;
+        if (!mConfig && mEnum != b) 
+            throw Reject();
+        mEnum = b;
     }
     if (desc->hasProperty("configurable"))
     {
         Data val = desc->getValue("configurable");
         bool b = val.toBoolean();
         if (!mConfig && b)
-            reject(t);
-        else
-            mConfig = b;
+            throw Reject();
+        mConfig = b;
+    }
+    
+    Type type = factor->type();
+    if ( (type != data::DATA_PROPERTY && isDataDesc(desc)) ||
+        (type != data::ACCESSOR_PROPERTY && isAccessorDesc(desc)) )
+    {
+        factor = createFactor(this, desc);
+    }
+    else
+    {
+        factor->define(desc);
     }
 }
 
-DataProperty::DataProperty(Data value, bool writable, bool enumerable, bool configurable)
-: Property(enumerable, configurable), mValue(value), mWritable(writable)
+Type Property::type()
+{
+    return factor->type();
+}
+
+PropertyPtr Property::create(Object* desc)
+{
+    Property* prop = new Property();
+    if (desc->hasProperty("enumerable"))
+    {
+        Data val = desc->getValue("enumerable");
+        prop->mEnum = val.toBoolean();
+    }
+    if (desc->hasProperty("configurable"))
+    {
+        Data val = desc->getValue("configurable");
+        prop->mConfig =  val.toBoolean();
+    }
+    prop->factor = createFactor(prop, desc);
+    return PropertyPtr(prop);
+}
+
+shared_ptr< PropertyFactor > Property::createFactor(Property* prop, Object* desc)
+{
+    PropertyFactor* factor;
+    if (isDataDesc(desc))
+    {
+        bool writable = false;
+        Data value;
+        
+        if (desc->hasProperty("writable")) 
+        {
+            Data val = desc->getValue("writable");
+            writable = val.toBoolean();
+        }
+        if (desc->hasProperty("value"))
+        {
+            value = desc->getValue("value");
+        }
+        factor = new DataPropertyFactor(value, writable, prop);
+    }
+    else if (isAccessorDesc(desc))
+    {
+        Function *get, *set;
+        if (desc->hasProperty("get"))
+        {
+            auto val = desc->getValue("get");
+            if (val != Data::OBJECT) {
+                auto obj = val.object();
+                auto func = dynamic_cast<Function*>(obj);
+                if (func == nullptr)
+                    throw Reject();
+                get = func;
+            }
+        }
+        
+        if (desc->hasProperty("set"))
+        {
+            auto val = desc->getValue("set");
+            if (val != Data::OBJECT) {
+                auto obj = val.object();
+                auto func = dynamic_cast<Function*>(obj);
+                if (func == nullptr)
+                    throw Reject();
+                set = func;
+            }
+        }
+        factor = new AccessorPropertyFactor(get, set, prop);
+    }
+    else 
+    {
+        factor = new DataPropertyFactor(Data(), false, prop);
+    }
+    
+    return shared_ptr<PropertyFactor>(factor);
+}
+
+
+bool Property::isDataDesc(Object* desc)
+{
+    return desc->hasProperty("writable") || desc->hasProperty("value");
+}
+
+bool Property::isAccessorDesc(Object* desc)
+{
+    return desc->hasProperty("get") || desc->hasProperty("set");
+}
+
+DataPropertyFactor::DataPropertyFactor(const Data value, bool writable, Property* prop)
+: PropertyFactor(prop), mValue(value), mWritable(writable)
 {
 }
 
-Data DataProperty::getValue(Object* obj)
+Data DataPropertyFactor::getValue(Object* obj)
 {
     return mValue;
 }
-
-void DataProperty::putValue(const Data& data, Object* obj, bool t)
+void DataPropertyFactor::putValue(const Data& data, Object* obj)
 {
-    if (!this->mWritable)
-        reject(t);
-    else
-        mValue = data;
+    mValue = data;
 }
 
-void DataProperty::define(Object* desc, bool t)
+void DataPropertyFactor::define(Object* desc)
 {
-    if (desc->hasProperty("writable"))
-    {
-        Data val = desc->getValue("writable");
-        bool b = val.toBoolean();
-        if (!mConfig && !mWritable && b)
-            reject(t);
-        else
-            mEnum = b;
-    }
     if (desc->hasProperty("value"))
     {
-        Data val = desc->getValue("value");
-        if (!mWritable && mValue != val)
-            reject(t);
-        else
-            mValue = val;
+        auto val = desc->getValue("value");
+        if (!mWritable && mValue != val) 
+            throw Reject();
+        mValue = val;
     }
-    BaseProperty::define(desc, t);
+    if (desc->hasProperty("writable")) 
+    {
+        auto val = desc->getValue("writable");
+        bool b = val.toBoolean();
+        if (!mWritable && !mProp->mConfig && b)
+            throw Reject();
+        mWritable = b;
+    }
 }
 
-AccessorProperty::AccessorProperty(Function* getter, Function* setter, bool enumerable, bool configurable)
-: Property(enumerable, configurable), mGetter(getter), mSetter(setter)
+
+AccessorPropertyFactor::AccessorPropertyFactor(Function* getter, Function* setter, Property* prop)
+: PropertyFactor(prop), mGetter(getter), mSetter(setter)
 {
+
 }
 
-Data AccessorProperty::getValue(Object* obj)
+Data AccessorPropertyFactor::getValue(Object* obj)
 {
     if (mGetter == nullptr)
         return Data::newUndefined();
     return mGetter->call(obj);
 }
 
-void AccessorProperty::putValue(const Data& data, Object* obj, bool t)
+void AccessorPropertyFactor::putValue(const Data& data, Object* obj)
 {
     if (mSetter == nullptr)
     {
-        reject(t);
+        throw Reject();
     }
     else
     {
@@ -115,94 +225,29 @@ void AccessorProperty::putValue(const Data& data, Object* obj, bool t)
     }
 }
 
-void AccessorProperty::define(Object* desc, bool t)
+
+void AccessorPropertyFactor::define(Object* desc)
 {
     if (desc->hasProperty("get"))
     {
-        Data val = desc->getValue("get");
-        if (val != Data::OBJECT)
-        {
-            Function* func = dynamic_cast<Function*>(val.object());
-            if (func == nullptr)
-                reject(t);
-            else
-                mGetter = func;
-        }
+        auto val = desc->getValue("get");
+        if (val.type() != Data::OBJECT)
+            throw Reject();
+        auto obj = val.object();
+        auto func = dynamic_cast<Function*>(obj);
+        if (func == nullptr)
+            throw Reject();
+        mGetter = func;
     }
     if (desc->hasProperty("set"))
     {
-        Data val = desc->getValue("get");
-        if (val != Data::OBJECT)
-        {
-            Function* func = dynamic_cast<Function*>(val.object());
-            if (func == nullptr)
-                reject(t);
-            else
-                mSetter = func;
-        }
-    }
-    BaseProperty::define(desc, t);
-}
-
-Data PropertyProxy::getValue(Object* obj)
-{
-    return prop->getValue(obj);
-}
-
-void PropertyProxy::putValue(const Data& data, Object* obj, bool t)
-{
-    prop->putValue(data, obj, t);
-}
-
-Type PropertyProxy::type()
-{
-    return prop->type();
-}
-
-void PropertyProxy::define(Object* desc, bool t)
-{
-    if (desc->hasProperty("writable") || desc->hasProperty("value"))
-    {
-        if (prop != nullptr)
-        {
-            Data::Type type = prop->type();
-            if (type == DATA_PROPERTY)
-            {
-                prop->define(desc, t);
-            }
-            else
-            {
-            }
-        }
-        else
-        {
-        }
-    }
-    else if (desc->hasProperty("get") || desc->hasProperty("set"))
-    {
-        if (prop != nullptr) 
-        {
-            if (type == ACCESSOR_PROPERTY)
-            {
-                prop->define(desc, t);
-            }
-            else 
-            {
-            }
-        }
-        else
-        {
-        }
-    }
-    else 
-    {
-        if (prop != nullptr) 
-        {
-            prop->define(desc, t);
-        }
-        else
-        {
-        }
+        auto val = desc->getValue("set");
+        if (val.type() != Data::OBJECT)
+            throw Reject();
+        auto obj = val.object();
+        auto func = dynamic_cast<Function*>(obj);
+        if (func == nullptr)
+            throw Reject();
+        mSetter = func;
     }
 }
-
