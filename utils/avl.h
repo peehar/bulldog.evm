@@ -32,6 +32,10 @@ class AVLMap
         T data;
     };
 public:
+    
+    AVLMap() : root(nullptr) 
+    {}
+    
     ~AVLMap()
     {
         deleteNode(root);

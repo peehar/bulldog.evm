@@ -17,6 +17,7 @@ class map
     };
 
 public:
+    map();
     PropertyPtr find(const wchar_t* key);
     PropertyPtr& operator[](const wchar_t* key);
 

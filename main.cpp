@@ -25,7 +25,7 @@ int main(int argc, char *argv[])
 //    obj.putValue(pname, data);
 //    cout << obj.getValue(pname).number() <<  endl;
 //    cout << "Hello World!" << endl;
-
+/*
     AVLMap<string, int, C> map;
 
     map.insert("abc", 10);
@@ -36,11 +36,19 @@ int main(int argc, char *argv[])
     map.insert("hufrmds", 10);
 
     map.insert("ubqw", 10);
-    map.insert("vmhew", 10);
+    map.insert("vmhew", 10);*/
 
 //    srand((unsigned)time(0));
 //    for (int i = 0; i < 10; i++)
 //        map.insert(rand() %100, rand() % 100);
+
+    data::map map;
+    Data data = Data::newString("fdsafdsafds");
+    map[L"a"] = PropertyPtr(new Property(data));
+    map[L"bc"] = PropertyPtr(new Property(data));
+    auto p = map.find(L"bc");
+    if (p)
+        cout << p->getValue().string() << endl;
 
     return 0;
 }

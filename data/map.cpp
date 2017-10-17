@@ -2,11 +2,16 @@
 
 namespace data {
 
-//PropertyPtr map::find(const char* key)
-//{
-//    auto node = find(key, false);
-//    return node != nullptr ? node->prop : PropertyPtr();
-//}
+map::map() : root(nullptr)
+{
+    
+}
+
+PropertyPtr map::find(const wchar_t* key)
+{
+   node_t *node = find(key, false);
+   return node != nullptr ? node->prop : PropertyPtr();
+}
 
 map::node_t* map::find(const wchar_t* key, bool create)
 {
@@ -20,7 +25,7 @@ map::node_t* map::find(const wchar_t* key, bool create)
     int index = 0;
     node_t* p = root;
     int i;
-    while (i = key[index])
+    while (i = key[index++])
     {
         try
         {
@@ -28,7 +33,8 @@ map::node_t* map::find(const wchar_t* key, bool create)
         }
         catch (CanNotFindException& e)
         {
-            if (create)
+            if (!create)
+                return nullptr;
             auto n = new node_t();
             p->points.insert(i, n);
             p = n;
@@ -38,10 +44,10 @@ map::node_t* map::find(const wchar_t* key, bool create)
     return p;
 }
 
-//PropertyPtr& map::operator[](const char* key)
-//{
-//    auto node = find(key, true);
-//    return node->prop;
-//}
+PropertyPtr& map::operator[](const wchar_t* key)
+{
+   node_t* node = find(key, true);
+   return node->prop;
+}
 
 } // namespace data
