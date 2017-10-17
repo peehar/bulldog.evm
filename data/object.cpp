@@ -18,9 +18,9 @@
 #include "object.h"
 #include "data.h"
 #include "property.h"
-#include "../typeerror.h"
+#include "../utils/typeerror.h"
 #include "function.h"
-#include "../wraper.h"
+#include "../utils/wraper.h"
 
 namespace data {
     

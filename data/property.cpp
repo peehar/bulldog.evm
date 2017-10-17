@@ -18,7 +18,7 @@
 #include "property.h"
 #include "function.h"
 #include "object.h"
-#include "../typeerror.h"
+#include "../utils/typeerror.h"
 
 using namespace data;
 using namespace std;

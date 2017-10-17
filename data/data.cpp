@@ -17,7 +17,7 @@
 
 #include "data.h"
 #include "object.h"
-#include "../typeerror.h"
+#include "../utils/typeerror.h"
 
 #include <cstring>
 

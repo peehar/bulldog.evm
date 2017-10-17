@@ -18,7 +18,7 @@
 #ifndef DATA_PROPERTY_H
 #define DATA_PROPERTY_H
 
-#include "../wraper.h"
+#include "../utils/wraper.h"
 #include "data.h"
 #include <memory>
 
